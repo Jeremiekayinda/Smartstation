@@ -1,0 +1,133 @@
+{% load static %}
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <title>Mes stations - Smartstation</title>
+    <link rel="stylesheet" href="{% static 'stations/css/styles.css' %}" />
+  </head>
+  <body class="app-body">
+    <div class="app-shell app-shell--dashboard">
+      <aside class="side-nav">
+        <div class="side-nav__header">
+          <div class="avatar-circle">S</div>
+          <div>
+            <h1 class="app-title">Smartstation</h1>
+            <p class="app-subtitle">Gestionnaire</p>
+          </div>
+        </div>
+
+        <nav class="side-nav__menu">
+          <a href="{% url 'stations-map' %}" class="menu-item">
+            <span class="menu-dot"></span>
+            Carte en direct
+          </a>
+          <a href="{% url 'stations-dashboard' %}" class="menu-item">
+            <span class="menu-dot"></span>
+            Dashboard
+          </a>
+          <a href="{% url 'my-stations' %}" class="menu-item menu-item--active">
+            <span class="menu-dot"></span>
+            Mes stations
+          </a>
+        </nav>
+
+        <div class="side-nav__footer">
+          {% if user.is_authenticated %}
+            <p class="user-label">Connecté en tant que</p>
+            <p class="user-name">{{ user.username }}</p>
+            <a href="{% url 'logout' %}" class="pill pill--secondary">Se déconnecter</a>
+          {% else %}
+            <p class="user-label">Session invitée</p>
+            <a href="{% url 'login' %}" class="pill pill--primary">Se connecter</a>
+          {% endif %}
+        </div>
+      </aside>
+
+      <main class="main-panel main-panel--dashboard">
+        <header class="top-bar">
+          <div>
+            <h2 class="top-bar__title">Mes stations</h2>
+            <p class="top-bar__subtitle">
+              Mettez à jour l’état de vos stations (ouvert / carburant / affluence).
+            </p>
+          </div>
+        </header>
+
+        <section class="dashboard-grid">
+          <section class="table-section card">
+            <div class="table-header">
+              <h2>Stations gérées par {{ user.username }}</h2>
+            </div>
+            <div class="table-wrapper">
+              {% if stations %}
+                <table class="stations-table">
+                  <thead>
+                    <tr>
+                      <th>Nom</th>
+                      <th>Statut</th>
+                      <th>Carburant</th>
+                      <th>Véhicules</th>
+                      <th>Affluence</th>
+                      <th></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for station in stations %}
+                      <tr>
+                        <td>{{ station.nom }}</td>
+                        <td>
+                          <form method="post">
+                            {% csrf_token %}
+                            <input type="hidden" name="station_id" value="{{ station.id }}" />
+                            <select name="statut" class="select-control" style="min-width: 110px">
+                              <option value="ouverte" {% if station.statut == "ouverte" %}selected{% endif %}>
+                                Ouverte
+                              </option>
+                              <option value="fermee" {% if station.statut == "fermee" %}selected{% endif %}>
+                                Fermée
+                              </option>
+                            </select>
+                        </td>
+                        <td>
+                            <label class="field-label" style="display: inline-flex; align-items: center; gap: 0.3rem;">
+                              <input
+                                type="checkbox"
+                                name="carburant_disponible"
+                                {% if station.carburant_disponible %}checked{% endif %}
+                              />
+                              Dispo
+                            </label>
+                        </td>
+                        <td>
+                          <input
+                            type="number"
+                            name="nombre_vehicules"
+                            value="{{ station.nombre_vehicules }}"
+                            min="0"
+                            class="select-control"
+                            style="width: 90px"
+                          />
+                        </td>
+                        <td>{{ station.niveau_affluence|capfirst }}</td>
+                        <td>
+                          <button type="submit" class="pill pill--primary" style="font-size: 0.75rem">
+                            Mettre à jour
+                          </button>
+                          </form>
+                        </td>
+                      </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              {% else %}
+                <p class="info-text">Aucune station ne vous a encore été attribuée.</p>
+              {% endif %}
+            </div>
+          </section>
+        </section>
+      </main>
+    </div>
+  </body>
+  </html>
+

@@ -1,0 +1,107 @@
+{% load static %}
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <title>Smartstation - Dashboard</title>
+    <link rel="stylesheet" href="{% static 'stations/css/styles.css' %}" />
+  </head>
+  <body class="app-body">
+    <div class="app-shell app-shell--dashboard">
+      <aside class="side-nav">
+        <div class="side-nav__header">
+          <div class="avatar-circle">S</div>
+          <div>
+            <h1 class="app-title">Smartstation</h1>
+            <p class="app-subtitle">Vue synthétique</p>
+          </div>
+        </div>
+
+        <nav class="side-nav__menu">
+          <a href="{% url 'stations-map' %}" class="menu-item">
+            <span class="menu-dot"></span>
+            Carte en direct
+          </a>
+          <a href="{% url 'stations-dashboard' %}" class="menu-item menu-item--active">
+            <span class="menu-dot"></span>
+            Dashboard
+          </a>
+          {% if user.is_authenticated %}
+            <a href="{% url 'my-stations' %}" class="menu-item">
+              <span class="menu-dot"></span>
+              Mes stations
+            </a>
+          {% endif %}
+        </nav>
+
+        <div class="side-nav__footer">
+          {% if user.is_authenticated %}
+            <p class="user-label">Connecté en tant que</p>
+            <p class="user-name">{{ user.username }}</p>
+            <a href="{% url 'logout' %}" class="pill pill--secondary">Se déconnecter</a>
+          {% else %}
+            <p class="user-label">Session invitée</p>
+            <a href="{% url 'login' %}" class="pill pill--primary">Se connecter</a>
+          {% endif %}
+        </div>
+      </aside>
+
+      <main class="main-panel main-panel--dashboard">
+        <header class="top-bar">
+          <div>
+            <h2 class="top-bar__title">Tableau de bord</h2>
+            <p class="top-bar__subtitle">
+              Surveillez l’activité globale des stations-service Smartstation.
+            </p>
+          </div>
+        </header>
+
+        <section class="dashboard-grid">
+          <section class="cards">
+            <article class="card card--stat">
+              <p class="card-label">Total stations</p>
+              <p class="card-number">{{ total_stations }}</p>
+            </article>
+            <article class="card card--stat">
+              <p class="card-label">Stations ouvertes</p>
+              <p class="card-number">{{ stations_ouvertes }}</p>
+            </article>
+            <article class="card card--stat">
+              <p class="card-label">Stations actives</p>
+              <p class="card-number">{{ stations_actives }}</p>
+            </article>
+          </section>
+
+          <section class="table-section card">
+            <div class="table-header">
+              <h2>Répartition par niveau d'affluence</h2>
+            </div>
+            <div class="table-wrapper">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Niveau</th>
+                    <th>Nombre de stations</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for item in repartition_affluence %}
+                    <tr>
+                      <td>{{ item.niveau_affluence|default:"-" }}</td>
+                      <td>{{ item.total }}</td>
+                    </tr>
+                  {% empty %}
+                    <tr>
+                      <td colspan="2">Aucune donnée pour le moment.</td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </section>
+        </section>
+      </main>
+    </div>
+  </body>
+  </html>
+
