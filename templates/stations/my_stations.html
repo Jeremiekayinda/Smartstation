@@ -5,12 +5,21 @@
     <meta charset="utf-8" />
     <title>Mes stations - Smartstation</title>
     <link rel="stylesheet" href="{% static 'stations/css/styles.css' %}" />
+    <link
+      rel="icon"
+      type="image/png"
+      href="{% static 'stations/img/Smartstationlogo.png' %}"
+    />
   </head>
   <body class="app-body">
     <div class="app-shell app-shell--dashboard">
       <aside class="side-nav">
         <div class="side-nav__header">
-          <div class="avatar-circle">S</div>
+          <img
+            src="{% static 'stations/img/Smartstationlogo.png' %}"
+            alt="Smartstation"
+            class="brand-logo"
+          />
           <div>
             <h1 class="app-title">Smartstation</h1>
             <p class="app-subtitle">Gestionnaire</p>
