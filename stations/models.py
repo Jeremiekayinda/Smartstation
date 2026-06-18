@@ -1,7 +1,10 @@
 from __future__ import annotations
 
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.conf import settings
+
+from .gestionnaires import validate_gestionnaire_user
 
 
 class StationService(models.Model):
@@ -26,11 +29,9 @@ class StationService(models.Model):
     longitude = models.FloatField()
     gestionnaire = models.ForeignKey(
         settings.AUTH_USER_MODEL,
-        null=True,
-        blank=True,
-        on_delete=models.SET_NULL,
+        on_delete=models.PROTECT,
         related_name="stations_geres",
-        help_text="Utilisateur responsable de la mise à jour de cette station.",
+        help_text="Gestionnaire dédié à cette station (compte non administrateur).",
     )
     statut = models.CharField(
         max_length=10,
@@ -60,7 +61,13 @@ class StationService(models.Model):
             return self.AFFLUENCE_MOYENNE
         return self.AFFLUENCE_FORTE
 
+    def clean(self) -> None:
+        super().clean()
+        validate_gestionnaire_user(self.gestionnaire)
+
     def save(self, *args, **kwargs) -> None:
+        if self.gestionnaire_id:
+            validate_gestionnaire_user(self.gestionnaire)
         self.niveau_affluence = self._calculer_affluence()
         super().save(*args, **kwargs)
 

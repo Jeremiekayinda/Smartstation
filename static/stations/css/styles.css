@@ -301,6 +301,12 @@ a:hover {
   color: #6b7280;
 }
 
+.form-error {
+  margin: 0.35rem 0 0;
+  font-size: 0.78rem;
+  color: #dc2626;
+}
+
 .field-label {
   display: block;
   font-size: 0.8rem;

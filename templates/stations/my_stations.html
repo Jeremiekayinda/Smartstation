@@ -45,10 +45,7 @@
           {% if user.is_authenticated %}
             <p class="user-label">Connecté en tant que</p>
             <p class="user-name">{{ user.username }}</p>
-            <a href="{% url 'logout' %}" class="pill pill--secondary">Se déconnecter</a>
-          {% else %}
-            <p class="user-label">Session invitée</p>
-            <a href="{% url 'login' %}" class="pill pill--primary">Se connecter</a>
+            <a href="{% url 'gestionnaire-logout' %}" class="pill pill--secondary">Se déconnecter</a>
           {% endif %}
         </div>
       </aside>

@@ -2,8 +2,11 @@ from typing import Any
 
 from django.db import transaction
 from django.urls import reverse_lazy
+from django.shortcuts import redirect
+from django.http import HttpResponseRedirect
 from django.views.generic import TemplateView, CreateView
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from django.contrib.auth.views import LoginView, LogoutView
 
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
@@ -18,10 +21,41 @@ from .serializers import (
 )
 from .forms import StationServiceForm
 from .permissions import IsAdminOrStationManagerOrReadOnly
+from .gestionnaires import is_gestionnaire_eligible
 
 
 class StationMapView(TemplateView):
     template_name = "stations/index.html"
+
+
+class GestionnaireLoginView(LoginView):
+    template_name = "stations/gestionnaire_login.html"
+    redirect_authenticated_user = True
+
+    def dispatch(self, request, *args, **kwargs):
+        if request.user.is_authenticated and not is_gestionnaire_eligible(request.user):
+            return redirect("admin:index")
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_success_url(self) -> str:
+        redirect_to = self.get_redirect_url()
+        if redirect_to:
+            return redirect_to
+        return str(reverse_lazy("my-stations"))
+
+    def form_valid(self, form):
+        user = form.get_user()
+        if not is_gestionnaire_eligible(user):
+            form.add_error(
+                None,
+                "Les administrateurs doivent utiliser l'interface d'administration (/admin/).",
+            )
+            return self.form_invalid(form)
+        return HttpResponseRedirect(self.get_success_url())
+
+
+class GestionnaireLogoutView(LogoutView):
+    next_page = reverse_lazy("gestionnaire-login")
 
 
 class StationCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
@@ -29,6 +63,7 @@ class StationCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
     form_class = StationServiceForm
     template_name = "stations/station_form.html"
     success_url = reverse_lazy("stations-map")
+    login_url = "/admin/login/"
 
     def test_func(self) -> bool:
         user = self.request.user
@@ -37,6 +72,12 @@ class StationCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
 
 class MyStationsView(LoginRequiredMixin, TemplateView):
     template_name = "stations/my_stations.html"
+    login_url = reverse_lazy("gestionnaire-login")
+
+    def dispatch(self, request, *args, **kwargs):
+        if request.user.is_authenticated and not is_gestionnaire_eligible(request.user):
+            return redirect("admin:index")
+        return super().dispatch(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
         context = super().get_context_data(**kwargs)

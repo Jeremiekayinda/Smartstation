@@ -1,0 +1,33 @@
+{% load static %}
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <title>Connexion gestionnaire - Smartstation</title>
+    <link rel="stylesheet" href="{% static 'stations/css/styles.css' %}" />
+    <link
+      rel="icon"
+      type="image/png"
+      href="{% static 'stations/img/Smartstationlogo.png' %}"
+    />
+  </head>
+  <body>
+    <main class="auth-container">
+      <form method="post" class="auth-form">
+        {% csrf_token %}
+        <img
+          src="{% static 'stations/img/Smartstationlogo.png' %}"
+          alt="Smartstation"
+          class="brand-logo"
+          style="display: block; margin: 0 auto 1rem; width: 56px; height: 56px"
+        />
+        <h1>Espace gestionnaire</h1>
+        <p style="margin-top: 0; margin-bottom: 1.25rem; color: #64748b; font-size: 0.9rem; text-align: center">
+          Connectez-vous pour gérer vos stations-service.
+        </p>
+        {{ form.as_p }}
+        <button type="submit">Se connecter</button>
+      </form>
+    </main>
+  </body>
+</html>
