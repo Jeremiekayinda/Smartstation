@@ -3,7 +3,7 @@
 <html lang="fr">
   <head>
     <meta charset="utf-8" />
-    <title>Connexion gestionnaire - Smartstation</title>
+    <title>Connexion admin - Smartstation</title>
     <link rel="stylesheet" href="{% static 'stations/css/styles.css' %}" />
     <link
       rel="icon"
@@ -21,10 +21,15 @@
           class="brand-logo"
           style="display: block; margin: 0 auto 1rem; width: 56px; height: 56px"
         />
-        <h1>Espace gestionnaire</h1>
+        <h1>Administration</h1>
         <p style="margin-top: 0; margin-bottom: 1.25rem; color: #64748b; font-size: 0.9rem; text-align: center">
-          Connectez-vous pour gérer vos stations-service.
+          Connectez-vous pour gérer toutes les stations-service.
         </p>
+        {% if form.non_field_errors %}
+          {% for error in form.non_field_errors %}
+            <p class="form-error" style="text-align: center">{{ error }}</p>
+          {% endfor %}
+        {% endif %}
         {{ form.as_p }}
         <button type="submit">Se connecter</button>
       </form>

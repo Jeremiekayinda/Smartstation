@@ -41,22 +41,10 @@
             <span class="menu-dot"></span>
             Dashboard
           </a>
-          {% if user.is_authenticated and not user.is_staff and not user.is_superuser %}
-            <a href="{% url 'my-stations' %}" class="menu-item">
-              <span class="menu-dot"></span>
-              Mes stations
-            </a>
-          {% endif %}
         </nav>
 
         <div class="side-nav__footer">
-          {% if user.is_authenticated %}
-            <p class="user-label">Connecté en tant que</p>
-            <p class="user-name">{{ user.username }}</p>
-            <a href="{% url 'logout' %}" class="pill pill--secondary">Se déconnecter</a>
-          {% else %}
-            <p class="user-label">Session invitée</p>
-          {% endif %}
+          <p class="user-label">Session invitée</p>
         </div>
       </aside>
 

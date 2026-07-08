@@ -1,0 +1,75 @@
+{% extends "stations/admin_base.html" %}
+
+{% block title %}Stations{% endblock %}
+
+{% block content %}
+<header class="top-bar">
+  <div>
+    <h2 class="top-bar__title">Toutes les stations</h2>
+    <p class="top-bar__subtitle">
+      Consultez l'état de chaque station et cliquez pour la gérer.
+    </p>
+  </div>
+  <a href="{% url 'station-create' %}" class="pill pill--primary">+ Nouvelle station</a>
+</header>
+
+<section class="dashboard-grid">
+  <section class="table-section card">
+    <div class="table-wrapper">
+      {% if stations %}
+        <table class="stations-table">
+          <thead>
+            <tr>
+              <th>Station</th>
+              <th>Statut</th>
+              <th>Carburant</th>
+              <th>Véhicules</th>
+              <th>Affluence</th>
+              <th>Mise à jour</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for station in stations %}
+              <tr>
+                <td><strong>{{ station.nom }}</strong></td>
+                <td>
+                  {% if station.statut == "ouverte" %}
+                    <span class="chip"><span class="chip-dot chip-dot--green"></span> Ouverte</span>
+                  {% else %}
+                    <span class="chip"><span class="chip-dot"></span> Fermée</span>
+                  {% endif %}
+                </td>
+                <td>
+                  {% if station.carburant_disponible %}
+                    Disponible
+                  {% else %}
+                    Rupture
+                  {% endif %}
+                </td>
+                <td>{{ station.nombre_vehicules }}</td>
+                <td>{{ station.niveau_affluence|capfirst }}</td>
+                <td>{{ station.date_mise_a_jour|date:"d/m/Y H:i" }}</td>
+                <td>
+                  <a
+                    href="{% url 'admin-station-detail' station.pk %}"
+                    class="pill pill--primary"
+                    style="font-size: 0.75rem"
+                  >
+                    Gérer
+                  </a>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      {% else %}
+        <p class="info-text">Aucune station pour le moment.</p>
+        <a href="{% url 'station-create' %}" class="pill pill--primary" style="margin-top: 1rem">
+          Créer la première station
+        </a>
+      {% endif %}
+    </div>
+  </section>
+</section>
+{% endblock %}

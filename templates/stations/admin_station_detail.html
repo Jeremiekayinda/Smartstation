@@ -1,40 +1,23 @@
 {% extends "stations/admin_base.html" %}
-{% load static %}
 
-{% block title %}Nouvelle station{% endblock %}
-
-{% block extra_head %}
-<link
-  rel="stylesheet"
-  href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-  integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
-  crossorigin=""
-/>
-{% endblock %}
+{% block title %}{{ station.nom }}{% endblock %}
 
 {% block content %}
 <header class="top-bar">
   <div>
-    <h2 class="top-bar__title">Ajouter une nouvelle station</h2>
+    <h2 class="top-bar__title">{{ station.nom }}</h2>
     <p class="top-bar__subtitle">
-      Cliquez sur la carte pour choisir la position, puis complétez les informations.
+      Gérez le statut, le carburant et l'affluence de cette station.
     </p>
   </div>
+  <a href="{% url 'admin-stations' %}" class="pill pill--secondary">← Retour à la liste</a>
 </header>
 
-<section class="content-grid">
-  <section class="map-card">
-    <div class="map-header">
-      <span class="map-label">Sélection de la position</span>
-      <span class="map-badge">Kinshasa</span>
-    </div>
-    <div id="map" class="map-canvas"></div>
-  </section>
-
-  <aside class="info-panel">
+<section class="dashboard-grid">
+  <section class="card" style="padding: 1.5rem">
     <form method="post" class="station-form">
       {% csrf_token %}
-      <h3 class="info-title">Détails de la station</h3>
+      <h3 class="info-title">Informations de la station</h3>
 
       <div class="form-group">
         <label class="field-label" for="{{ form.nom.id_for_label }}">Nom</label>
@@ -72,6 +55,11 @@
         </div>
       </div>
 
+      <p class="info-text" style="margin-top: 0.5rem">
+        Affluence actuelle : <strong>{{ station.niveau_affluence|capfirst }}</strong>
+        (calculée automatiquement)
+      </p>
+
       {% if form.errors %}
         {% for field, errors in form.errors.items %}
           {% for error in errors %}
@@ -80,19 +68,38 @@
         {% endfor %}
       {% endif %}
 
-      <button type="submit" class="pill pill--primary" style="width: 100%; margin-top: 1rem">
-        Enregistrer la station
+      <button type="submit" class="pill pill--primary" style="margin-top: 1rem">
+        Enregistrer les modifications
       </button>
     </form>
-  </aside>
-</section>
-{% endblock %}
+  </section>
 
-{% block extra_js %}
-<script
-  src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-  integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
-  crossorigin=""
-></script>
-<script src="{% static 'stations/js/station_form.js' %}"></script>
+  <section class="table-section card">
+    <div class="table-header">
+      <h2>Dernières lectures capteur</h2>
+    </div>
+    <div class="table-wrapper">
+      {% if historiques %}
+        <table>
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Véhicules détectés</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for h in historiques %}
+              <tr>
+                <td>{{ h.timestamp|date:"d/m/Y H:i:s" }}</td>
+                <td>{{ h.nombre_vehicules }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      {% else %}
+        <p class="info-text">Aucune donnée capteur reçue pour cette station.</p>
+      {% endif %}
+    </div>
+  </section>
+</section>
 {% endblock %}

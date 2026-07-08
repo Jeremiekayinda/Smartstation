@@ -2,14 +2,11 @@ from typing import Any
 
 from django.db import transaction
 from django.urls import reverse_lazy
-from django.shortcuts import redirect
-from django.http import HttpResponseRedirect
-from django.views.generic import TemplateView, CreateView
+from django.views.generic import TemplateView, CreateView, UpdateView
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.contrib.auth.views import LoginView, LogoutView
 
 from rest_framework import viewsets, status
-from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -20,100 +17,81 @@ from .serializers import (
     HistoriqueCapteursSerializer,
 )
 from .forms import StationServiceForm
-from .permissions import IsAdminOrStationManagerOrReadOnly
-from .gestionnaires import is_gestionnaire_eligible
+from .permissions import IsAdminOrReadOnly
 
 
-class StationMapView(TemplateView):
-    template_name = "stations/index.html"
-
-
-class GestionnaireLoginView(LoginView):
-    template_name = "stations/gestionnaire_login.html"
-    redirect_authenticated_user = True
-
-    def dispatch(self, request, *args, **kwargs):
-        if request.user.is_authenticated and not is_gestionnaire_eligible(request.user):
-            return redirect("admin:index")
-        return super().dispatch(request, *args, **kwargs)
-
-    def get_success_url(self) -> str:
-        redirect_to = self.get_redirect_url()
-        if redirect_to:
-            return redirect_to
-        return str(reverse_lazy("my-stations"))
-
-    def form_valid(self, form):
-        user = form.get_user()
-        if not is_gestionnaire_eligible(user):
-            form.add_error(
-                None,
-                "Les administrateurs doivent utiliser l'interface d'administration (/admin/).",
-            )
-            return self.form_invalid(form)
-        return HttpResponseRedirect(self.get_success_url())
-
-
-class GestionnaireLogoutView(LogoutView):
-    next_page = reverse_lazy("gestionnaire-login")
-
-
-class StationCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
-    model = StationService
-    form_class = StationServiceForm
-    template_name = "stations/station_form.html"
-    success_url = reverse_lazy("stations-map")
-    login_url = "/admin/login/"
+class AdminRequiredMixin(LoginRequiredMixin, UserPassesTestMixin):
+    login_url = reverse_lazy("admin-login")
 
     def test_func(self) -> bool:
         user = self.request.user
         return bool(user and (user.is_staff or user.is_superuser))
 
 
-class MyStationsView(LoginRequiredMixin, TemplateView):
-    template_name = "stations/my_stations.html"
-    login_url = reverse_lazy("gestionnaire-login")
+class StationMapView(TemplateView):
+    template_name = "stations/index.html"
 
-    def dispatch(self, request, *args, **kwargs):
-        if request.user.is_authenticated and not is_gestionnaire_eligible(request.user):
-            return redirect("admin:index")
-        return super().dispatch(request, *args, **kwargs)
+
+class AdminLoginView(LoginView):
+    template_name = "stations/admin_login.html"
+    redirect_authenticated_user = True
+
+    def get_success_url(self) -> str:
+        redirect_to = self.get_redirect_url()
+        if redirect_to:
+            return redirect_to
+        return str(reverse_lazy("admin-stations"))
+
+    def form_valid(self, form):
+        user = form.get_user()
+        if not (user.is_staff or user.is_superuser):
+            form.add_error(
+                None,
+                "Accès réservé aux administrateurs.",
+            )
+            return self.form_invalid(form)
+        return super().form_valid(form)
+
+
+class AdminLogoutView(LogoutView):
+    next_page = reverse_lazy("admin-login")
+
+
+class AdminStationListView(AdminRequiredMixin, TemplateView):
+    template_name = "stations/admin_stations.html"
 
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
         context = super().get_context_data(**kwargs)
-        context["stations"] = StationService.objects.filter(gestionnaire=self.request.user)
+        context["stations"] = StationService.objects.all()
         return context
 
-    def post(self, request, *args: Any, **kwargs: Any):
-        station_id = request.POST.get("station_id")
-        try:
-            station = StationService.objects.get(id=station_id, gestionnaire=request.user)
-        except StationService.DoesNotExist:
-            return self.get(request, *args, **kwargs)
 
-        statut = request.POST.get("statut")
-        carburant = request.POST.get("carburant_disponible")
-        nombre_vehicules = request.POST.get("nombre_vehicules")
+class AdminStationDetailView(AdminRequiredMixin, UpdateView):
+    model = StationService
+    form_class = StationServiceForm
+    template_name = "stations/admin_station_detail.html"
+    context_object_name = "station"
 
-        if statut in dict(StationService.STATUT_CHOICES):
-            station.statut = statut
+    def get_success_url(self):
+        return reverse_lazy("admin-station-detail", kwargs={"pk": self.object.pk})
 
-        station.carburant_disponible = carburant == "on"
+    def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
+        context = super().get_context_data(**kwargs)
+        context["historiques"] = self.object.historiques.all()[:10]
+        return context
 
-        try:
-            station.nombre_vehicules = max(0, int(nombre_vehicules))
-        except (TypeError, ValueError):
-            pass
 
-        station.save()
-
-        return self.get(request, *args, **kwargs)
+class StationCreateView(AdminRequiredMixin, CreateView):
+    model = StationService
+    form_class = StationServiceForm
+    template_name = "stations/station_form.html"
+    success_url = reverse_lazy("admin-stations")
 
 
 class StationServiceViewSet(viewsets.ModelViewSet):
     queryset = StationService.objects.all()
     serializer_class = StationServiceSerializer
-    permission_classes = [IsAdminOrStationManagerOrReadOnly]
+    permission_classes = [IsAdminOrReadOnly]
 
     def get_queryset(self):
         qs = super().get_queryset()
@@ -134,10 +112,8 @@ class CapteurDataView(APIView):
 
     @transaction.atomic
     def post(self, request, *args: Any, **kwargs: Any) -> Response:
-        # Données attendues : station_id (ou station), nombre_vehicules, statut?, carburant_disponible?
         data = request.data.copy()
 
-        # Supporte station_id en alias de station pour simplifier côté IoT
         station_id = data.get("station_id")
         if station_id is not None and data.get("station") is None:
             data["station"] = station_id
@@ -156,7 +132,6 @@ class CapteurDataView(APIView):
 
         carburant_disponible = data.get("carburant_disponible")
         if carburant_disponible is not None:
-            # Accepte booléen natif, 0/1 ou chaînes "true"/"false"
             if isinstance(carburant_disponible, bool):
                 station.carburant_disponible = carburant_disponible
             elif isinstance(carburant_disponible, (int, float)):
@@ -213,4 +188,3 @@ class DashboardView(TemplateView):
             }
         )
         return context
-

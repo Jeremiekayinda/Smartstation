@@ -1,38 +1,17 @@
 from rest_framework.permissions import BasePermission, SAFE_METHODS
 
 
-class IsAdminOrStationManagerOrReadOnly(BasePermission):
-    """
-    - Lecture : tout le monde
-    - Création : uniquement admin/staff
-    - Mise à jour / suppression : admin/staff ou gestionnaire de la station
-    """
+class IsAdminOrReadOnly(BasePermission):
+    """Lecture publique, écriture réservée aux administrateurs (staff)."""
 
     def has_permission(self, request, view):
         if request.method in SAFE_METHODS:
             return True
-
         user = request.user
-        if not user or not user.is_authenticated:
-            return False
-
-        # Création de station uniquement pour l'admin (via API)
-        if getattr(view, "action", None) == "create":
-            return user.is_staff or user.is_superuser
-
-        return True
+        return bool(user and user.is_authenticated and (user.is_staff or user.is_superuser))
 
     def has_object_permission(self, request, view, obj):
         if request.method in SAFE_METHODS:
             return True
-
         user = request.user
-        if not user or not user.is_authenticated:
-            return False
-
-        if user.is_staff or user.is_superuser:
-            return True
-
-        # Gestionnaire rattaché à la station
-        return getattr(obj, "gestionnaire_id", None) == user.id
-
+        return bool(user and user.is_authenticated and (user.is_staff or user.is_superuser))

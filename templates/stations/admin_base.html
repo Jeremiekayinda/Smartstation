@@ -1,0 +1,64 @@
+{% load static %}
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <title>{% block title %}Administration{% endblock %} - Smartstation</title>
+    <link rel="stylesheet" href="{% static 'stations/css/styles.css' %}" />
+    <link
+      rel="icon"
+      type="image/png"
+      href="{% static 'stations/img/Smartstationlogo.png' %}"
+    />
+    {% block extra_head %}{% endblock %}
+  </head>
+  <body class="app-body">
+    <div class="app-shell app-shell--dashboard">
+      <aside class="side-nav">
+        <div class="side-nav__header">
+          <img
+            src="{% static 'stations/img/Smartstationlogo.png' %}"
+            alt="Smartstation"
+            class="brand-logo"
+          />
+          <div>
+            <h1 class="app-title">Smartstation</h1>
+            <p class="app-subtitle">Administration</p>
+          </div>
+        </div>
+
+        <nav class="side-nav__menu">
+          <a
+            href="{% url 'admin-stations' %}"
+            class="menu-item {% if request.resolver_match.url_name == 'admin-stations' or request.resolver_match.url_name == 'admin-station-detail' %}menu-item--active{% endif %}"
+          >
+            <span class="menu-dot"></span>
+            Toutes les stations
+          </a>
+          <a
+            href="{% url 'station-create' %}"
+            class="menu-item {% if request.resolver_match.url_name == 'station-create' %}menu-item--active{% endif %}"
+          >
+            <span class="menu-dot"></span>
+            Nouvelle station
+          </a>
+          <a href="{% url 'stations-map' %}" class="menu-item">
+            <span class="menu-dot"></span>
+            Voir la carte publique
+          </a>
+        </nav>
+
+        <div class="side-nav__footer">
+          <p class="user-label">Administrateur</p>
+          <p class="user-name">{{ user.username }}</p>
+          <a href="{% url 'admin-logout' %}" class="pill pill--secondary">Se déconnecter</a>
+        </div>
+      </aside>
+
+      <main class="main-panel main-panel--dashboard">
+        {% block content %}{% endblock %}
+      </main>
+    </div>
+    {% block extra_js %}{% endblock %}
+  </body>
+</html>

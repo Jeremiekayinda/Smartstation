@@ -7,9 +7,10 @@ from .views import (
     CapteurDataView,
     DashboardView,
     StationCreateView,
-    MyStationsView,
-    GestionnaireLoginView,
-    GestionnaireLogoutView,
+    AdminLoginView,
+    AdminLogoutView,
+    AdminStationListView,
+    AdminStationDetailView,
 )
 
 router = DefaultRouter()
@@ -18,19 +19,23 @@ router.register(r"stations", StationServiceViewSet, basename="station")
 urlpatterns = [
     path("", StationMapView.as_view(), name="stations-map"),
     path("dashboard/", DashboardView.as_view(), name="stations-dashboard"),
+    path("administration/connexion/", AdminLoginView.as_view(), name="admin-login"),
     path(
-        "gestionnaire/connexion/",
-        GestionnaireLoginView.as_view(),
-        name="gestionnaire-login",
+        "administration/deconnexion/",
+        AdminLogoutView.as_view(),
+        name="admin-logout",
+    ),
+    path("administration/", AdminStationListView.as_view(), name="admin-stations"),
+    path(
+        "administration/stations/nouvelle/",
+        StationCreateView.as_view(),
+        name="station-create",
     ),
     path(
-        "gestionnaire/deconnexion/",
-        GestionnaireLogoutView.as_view(),
-        name="gestionnaire-logout",
+        "administration/stations/<int:pk>/",
+        AdminStationDetailView.as_view(),
+        name="admin-station-detail",
     ),
-    path("mes-stations/", MyStationsView.as_view(), name="my-stations"),
-    path("stations/nouvelle/", StationCreateView.as_view(), name="station-create"),
     path("api/capteurs/", CapteurDataView.as_view(), name="api-capteurs"),
     path("api/", include(router.urls)),
 ]
-
