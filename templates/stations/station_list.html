@@ -1,0 +1,51 @@
+{% extends "stations/base_public.html" %}
+
+{% block title %}Stations{% endblock %}
+
+{% block content %}
+<div class="ss-page-wrap">
+  <h1 class="fw-bold mb-1">Stations-service</h1>
+  <p class="text-muted mb-4">Consultez l'état de toutes les stations en temps réel.</p>
+
+  <div class="ss-station-grid">
+    {% for station in stations %}
+      <article class="ss-card">
+        <div class="d-flex justify-content-between align-items-start mb-2">
+          <h2 class="h5 mb-0">{{ station.nom }}</h2>
+          {% if station.niveau_affluence == "faible" %}
+            <span class="ss-badge ss-badge--green">{{ station.affluence_label }}</span>
+          {% elif station.niveau_affluence == "moyenne" %}
+            <span class="ss-badge ss-badge--orange">{{ station.affluence_label }}</span>
+          {% else %}
+            <span class="ss-badge ss-badge--red">{{ station.affluence_label }}</span>
+          {% endif %}
+        </div>
+        <p class="text-muted small mb-2">
+          <i class="bi bi-geo-alt"></i> {{ station.adresse|default:"Kinshasa, RDC" }}
+        </p>
+        <div class="d-flex flex-wrap gap-2 mb-3">
+          {% if station.statut == "ouverte" %}
+            <span class="ss-badge ss-badge--green">Ouverte</span>
+          {% else %}
+            <span class="ss-badge ss-badge--gray">Fermée</span>
+          {% endif %}
+          {% if station.carburant_disponible %}
+            <span class="ss-badge ss-badge--green">Carburant OK</span>
+          {% else %}
+            <span class="ss-badge ss-badge--red">Rupture</span>
+          {% endif %}
+        </div>
+        <p class="small mb-3">
+          <i class="bi bi-car-front"></i> {{ station.nombre_vehicules }} véhicules ·
+          Attente {{ station.temps_attente_estime }}
+        </p>
+        <a href="{% url 'station-page' station.pk %}" class="ss-btn ss-btn--primary ss-btn--sm">
+          Voir détails <i class="bi bi-arrow-right"></i>
+        </a>
+      </article>
+    {% empty %}
+      <p class="text-muted">Aucune station enregistrée.</p>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

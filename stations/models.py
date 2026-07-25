@@ -21,8 +21,16 @@ class StationService(models.Model):
     ]
 
     nom = models.CharField(max_length=255)
+    adresse = models.CharField(max_length=500, blank=True, default="")
     latitude = models.FloatField()
     longitude = models.FloatField()
+    telephone = models.CharField(max_length=30, blank=True, default="")
+    carburants = models.CharField(
+        max_length=255,
+        default="Essence, Gasoil",
+        help_text="Carburants proposés, séparés par des virgules.",
+    )
+    capacite_max = models.PositiveIntegerField(default=30)
     statut = models.CharField(
         max_length=10,
         choices=STATUT_CHOICES,
@@ -49,6 +57,29 @@ class StationService(models.Model):
         if 6 <= self.nombre_vehicules <= 15:
             return self.AFFLUENCE_MOYENNE
         return self.AFFLUENCE_FORTE
+
+    @property
+    def taux_occupation(self) -> float:
+        if not self.capacite_max:
+            return 0.0
+        return round((self.nombre_vehicules / self.capacite_max) * 100, 1)
+
+    @property
+    def temps_attente_estime(self) -> str:
+        if self.statut == self.STATUT_FERMEE:
+            return "Fermée"
+        if not self.carburant_disponible:
+            return "Indisponible"
+        mapping = {
+            self.AFFLUENCE_FAIBLE: "~5 min",
+            self.AFFLUENCE_MOYENNE: "~15 min",
+            self.AFFLUENCE_FORTE: "~30 min",
+        }
+        return mapping.get(self.niveau_affluence, "~10 min")
+
+    @property
+    def affluence_label(self) -> str:
+        return dict(self.AFFLUENCE_CHOICES).get(self.niveau_affluence, self.niveau_affluence)
 
     def save(self, *args, **kwargs) -> None:
         self.niveau_affluence = self._calculer_affluence()

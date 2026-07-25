@@ -1,0 +1,103 @@
+{% extends "stations/base_public.html" %}
+
+{% block title %}Mon profil{% endblock %}
+
+{% block content %}
+<div class="ss-page-wrap">
+  <h1 class="fw-bold mb-1">Mon profil</h1>
+  <p class="text-muted mb-4">Consultez les informations de votre compte SmartStation.</p>
+
+  {% if messages %}
+    <div class="ss-profile-messages mb-3">
+      {% for message in messages %}
+        <div class="alert alert-{{ message.tags|default:'info' }} mb-2 py-2" role="alert">{{ message }}</div>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  <div class="ss-profile-single">
+    <article class="ss-card">
+      <div class="ss-profile-field">
+        <span class="ss-profile-field__icon" aria-hidden="true"><i class="fa-solid fa-user"></i></span>
+        <div class="ss-profile-field__body">
+          <span class="text-muted small">Prénom</span>
+          <span class="ss-profile-field__value">{{ user.first_name|default:"Non renseigné" }}</span>
+        </div>
+      </div>
+
+      <div class="ss-profile-field">
+        <span class="ss-profile-field__icon" aria-hidden="true"><i class="fa-solid fa-user-tag"></i></span>
+        <div class="ss-profile-field__body">
+          <span class="text-muted small">Nom</span>
+          <span class="ss-profile-field__value">{{ user.last_name|default:"Non renseigné" }}</span>
+        </div>
+      </div>
+
+      <div class="ss-profile-field">
+        <span class="ss-profile-field__icon" aria-hidden="true"><i class="fa-solid fa-envelope"></i></span>
+        <div class="ss-profile-field__body">
+          <span class="text-muted small">Adresse e-mail</span>
+          <span class="ss-profile-field__value">{{ user.email|default:"Non renseigné" }}</span>
+        </div>
+      </div>
+
+      <div class="ss-profile-field">
+        <span class="ss-profile-field__icon" aria-hidden="true"><i class="fa-solid fa-user-shield"></i></span>
+        <div class="ss-profile-field__body">
+          <span class="text-muted small">Rôle</span>
+          <span class="ss-profile-field__value">
+            {% if user.is_staff or user.is_superuser %}
+              <span class="ss-badge ss-badge--yellow">Administrateur</span>
+            {% else %}
+              <span class="ss-badge ss-badge--gray">Utilisateur</span>
+            {% endif %}
+          </span>
+        </div>
+      </div>
+
+      <div class="ss-profile-field ss-profile-field--last">
+        <span class="ss-profile-field__icon" aria-hidden="true"><i class="fa-solid fa-circle-check"></i></span>
+        <div class="ss-profile-field__body">
+          <span class="text-muted small">Statut du compte</span>
+          <span class="ss-profile-field__value">
+            {% if user.is_active %}
+              <span class="ss-badge ss-badge--green">Compte actif</span>
+            {% else %}
+              <span class="ss-badge ss-badge--gray">Compte inactif</span>
+            {% endif %}
+          </span>
+        </div>
+      </div>
+
+      <button
+        type="button"
+        class="ss-btn ss-btn--danger ss-btn--sm mt-3"
+        data-bs-toggle="modal"
+        data-bs-target="#logoutModal"
+      >
+        <i class="fa-solid fa-right-from-bracket" aria-hidden="true"></i> Déconnexion
+      </button>
+    </article>
+  </div>
+</div>
+
+<div class="modal fade ss-logout-modal" id="logoutModal" tabindex="-1" aria-labelledby="logoutModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content ss-card ss-logout-modal__content">
+      <div class="modal-body ss-logout-modal__body">
+        <div class="ss-logout-modal__icon" aria-hidden="true">
+          <i class="fa-solid fa-right-from-bracket"></i>
+        </div>
+        <p class="ss-logout-modal__text" id="logoutModalLabel">Êtes-vous sûr de vouloir vous déconnecter ?</p>
+        <div class="ss-logout-modal__actions">
+          <button type="button" class="ss-btn ss-btn--ghost ss-btn--sm" data-bs-dismiss="modal">Annuler</button>
+          <form method="post" action="{% url 'logout' %}" class="ss-logout-modal__form">
+            {% csrf_token %}
+            <button type="submit" class="ss-btn ss-btn--danger ss-btn--sm">Déconnexion</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

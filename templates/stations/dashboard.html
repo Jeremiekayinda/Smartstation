@@ -1,103 +1,47 @@
-{% load static %}
-<!doctype html>
-<html lang="fr">
-  <head>
-    <meta charset="utf-8" />
-    <title>Smartstation - Dashboard</title>
-    <link rel="stylesheet" href="{% static 'stations/css/styles.css' %}" />
-    <link
-      rel="icon"
-      type="image/png"
-      href="{% static 'stations/img/Smartstationlogo.png' %}"
-    />
-  </head>
-  <body class="app-body">
-    <div class="app-shell app-shell--dashboard">
-      <aside class="side-nav">
-        <div class="side-nav__header">
-          <img
-            src="{% static 'stations/img/Smartstationlogo.png' %}"
-            alt="Smartstation"
-            class="brand-logo"
-          />
-          <div>
-            <h1 class="app-title">Smartstation</h1>
-            <p class="app-subtitle">Vue synthétique</p>
-          </div>
-        </div>
+{% extends "stations/base_admin.html" %}
 
-        <nav class="side-nav__menu">
-          <a href="{% url 'stations-map' %}" class="menu-item">
-            <span class="menu-dot"></span>
-            Carte en direct
-          </a>
-          <a href="{% url 'stations-dashboard' %}" class="menu-item menu-item--active">
-            <span class="menu-dot"></span>
-            Dashboard
-          </a>
-        </nav>
+{% block title %}Tableau de bord{% endblock %}
 
-        <div class="side-nav__footer">
-          <p class="user-label">Session invitée</p>
-        </div>
-      </aside>
-
-      <main class="main-panel main-panel--dashboard">
-        <header class="top-bar">
-          <div>
-            <h2 class="top-bar__title">Tableau de bord</h2>
-            <p class="top-bar__subtitle">
-              Surveillez l’activité globale des stations-service Smartstation.
-            </p>
-          </div>
-        </header>
-
-        <section class="dashboard-grid">
-          <section class="cards">
-            <article class="card card--stat">
-              <p class="card-label">Total stations</p>
-              <p class="card-number">{{ total_stations }}</p>
-            </article>
-            <article class="card card--stat">
-              <p class="card-label">Stations ouvertes</p>
-              <p class="card-number">{{ stations_ouvertes }}</p>
-            </article>
-            <article class="card card--stat">
-              <p class="card-label">Stations actives</p>
-              <p class="card-number">{{ stations_actives }}</p>
-            </article>
-          </section>
-
-          <section class="table-section card">
-            <div class="table-header">
-              <h2>Répartition par niveau d'affluence</h2>
-            </div>
-            <div class="table-wrapper">
-              <table>
-                <thead>
-                  <tr>
-                    <th>Niveau</th>
-                    <th>Nombre de stations</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {% for item in repartition_affluence %}
-                    <tr>
-                      <td>{{ item.niveau_affluence|default:"-" }}</td>
-                      <td>{{ item.total }}</td>
-                    </tr>
-                  {% empty %}
-                    <tr>
-                      <td colspan="2">Aucune donnée pour le moment.</td>
-                    </tr>
-                  {% endfor %}
-                </tbody>
-              </table>
-            </div>
-          </section>
-        </section>
-      </main>
+{% block content %}
+<header class="ss-admin-hero">
+  <h1>Tableau de bord</h1>
+  <p class="text-secondary mb-0">Vue synthétique de l'activité SmartStation.</p>
+</header>
+<div class="p-3">
+  <div class="row g-3 mb-4">
+    <div class="col-md-4"><div class="ss-card ss-stat-card"><div class="number">{{ total_stations }}</div><div class="label">Total stations</div></div></div>
+    <div class="col-md-4"><div class="ss-card ss-stat-card"><div class="number">{{ stations_ouvertes }}</div><div class="label">Stations ouvertes</div></div></div>
+    <div class="col-md-4"><div class="ss-card ss-stat-card"><div class="number">{{ stations_actives }}</div><div class="label">Stations actives</div></div></div>
+  </div>
+  <div class="row g-3">
+    <div class="col-md-5">
+      <div class="ss-card">
+        <h2 class="h6 fw-bold mb-3">Répartition affluence</h2>
+        <table class="ss-table">
+          <thead><tr><th>Niveau</th><th>Nombre</th></tr></thead>
+          <tbody>
+            {% for item in repartition_affluence %}
+              <tr><td>{{ item.niveau_affluence|default:"-" }}</td><td>{{ item.total }}</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
     </div>
-  </body>
-  </html>
-
+    <div class="col-md-7">
+      <div class="ss-card">
+        <h2 class="h6 fw-bold mb-3">Dernières lectures capteurs</h2>
+        <table class="ss-table">
+          <thead><tr><th>Station</th><th>Véhicules</th><th>Date</th></tr></thead>
+          <tbody>
+            {% for h in derniers_capteurs %}
+              <tr><td>{{ h.station.nom }}</td><td>{{ h.nombre_vehicules }}</td><td>{{ h.timestamp|date:"d/m/Y H:i" }}</td></tr>
+            {% empty %}
+              <tr><td colspan="3" class="text-muted">Aucune donnée.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

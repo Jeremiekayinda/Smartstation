@@ -1,0 +1,112 @@
+{% extends "stations/base_public.html" %}
+{% load static %}
+
+{% block title %}{{ station.nom }}{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" />
+{% endblock %}
+
+{% block content %}
+<header class="ss-admin-hero">
+  <p class="ss-breadcrumb mb-2">
+    <a href="{% url 'map' %}">Carte</a> / {{ station.nom }}
+  </p>
+  <div class="d-flex flex-wrap justify-content-between align-items-end gap-3">
+    <div>
+      <h1>{{ station.nom }}</h1>
+      <p class="text-warning fw-semibold mb-0">SS-{{ station.id|stringformat:"03d" }}</p>
+    </div>
+    <div class="d-flex gap-2">
+      <a href="https://www.google.com/maps/dir/?api=1&destination={{ station.latitude }},{{ station.longitude }}" target="_blank" rel="noopener" class="ss-btn ss-btn--primary">
+        <i class="bi bi-signpost-split"></i> Me guider
+      </a>
+      <a href="{% url 'stations-list' %}" class="ss-btn ss-btn--dark">
+        <i class="bi bi-arrow-left"></i> Retour
+      </a>
+    </div>
+  </div>
+</header>
+
+<section class="ss-detail-grid">
+  <div class="ss-card">
+    <h2 class="h5 fw-bold mb-3"><i class="bi bi-info-circle text-warning"></i> Informations</h2>
+    <dl class="mb-0">
+      <dt class="text-muted small">Adresse</dt>
+      <dd>{{ station.adresse|default:"Kinshasa, RDC" }}</dd>
+      <dt class="text-muted small mt-2">Téléphone</dt>
+      <dd>{{ station.telephone|default:"—" }}</dd>
+      <dt class="text-muted small mt-2">Carburants</dt>
+      <dd>{{ station.carburants }}</dd>
+      <dt class="text-muted small mt-2">Statut</dt>
+      <dd>
+        {% if station.statut == "ouverte" %}
+          <span class="ss-badge ss-badge--green">Ouverte</span>
+        {% else %}
+          <span class="ss-badge ss-badge--gray">Fermée</span>
+        {% endif %}
+      </dd>
+      <dt class="text-muted small mt-2">Carburant</dt>
+      <dd>
+        {% if station.carburant_disponible %}
+          <span class="ss-badge ss-badge--green">Disponible</span>
+        {% else %}
+          <span class="ss-badge ss-badge--red">Rupture</span>
+        {% endif %}
+      </dd>
+      <dt class="text-muted small mt-2">Dernière mise à jour</dt>
+      <dd>{{ station.date_mise_a_jour|date:"d/m/Y H:i" }}</dd>
+    </dl>
+  </div>
+
+  <div>
+    <div class="ss-card mb-3">
+      <h2 class="h5 fw-bold mb-3"><i class="bi bi-people text-warning"></i> Affluence en temps réel</h2>
+      <div class="ss-metric-grid">
+        <div class="ss-metric">
+          <div class="value">{{ station.nombre_vehicules }}</div>
+          <div class="label">Véhicules</div>
+        </div>
+        <div class="ss-metric">
+          <div class="value">{{ station.taux_occupation }}%</div>
+          <div class="label">Occupation</div>
+        </div>
+        <div class="ss-metric">
+          <div class="value">
+            {% if station.niveau_affluence == "faible" %}
+              <span class="ss-badge ss-badge--green">{{ station.affluence_label }}</span>
+            {% elif station.niveau_affluence == "moyenne" %}
+              <span class="ss-badge ss-badge--orange">{{ station.affluence_label }}</span>
+            {% else %}
+              <span class="ss-badge ss-badge--red">{{ station.affluence_label }}</span>
+            {% endif %}
+          </div>
+          <div class="label">Niveau</div>
+        </div>
+        <div class="ss-metric">
+          <div class="value">{{ station.capacite_max }}</div>
+          <div class="label">Capacité max</div>
+        </div>
+      </div>
+      <p class="text-muted small mb-0">
+        <i class="bi bi-clock"></i> Temps d'attente estimé : <strong>{{ station.temps_attente_estime }}</strong>
+      </p>
+    </div>
+    <div class="ss-card p-0 overflow-hidden">
+      <div id="detail-map" style="height: 320px"></div>
+    </div>
+  </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+<script>
+  const map = L.map("detail-map").setView([{{ station.latitude }}, {{ station.longitude }}], 15);
+  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 19 }).addTo(map);
+  const color = {% if station.niveau_affluence == "faible" %}"#22c55e"{% elif station.niveau_affluence == "moyenne" %}"#f97316"{% else %}"#ef4444"{% endif %};
+  L.circleMarker([{{ station.latitude }}, {{ station.longitude }}], {
+    radius: 14, fillColor: color, color: "#fff", weight: 3, fillOpacity: 0.9
+  }).addTo(map).bindPopup("{{ station.nom|escapejs }}");
+</script>
+{% endblock %}

@@ -15,21 +15,18 @@
         <span class="ss-logo">
           <span class="ss-logo__smart">Smart</span><span class="ss-logo__station">Station</span>
         </span>
-        <p class="small text-secondary mb-0">Cartographie intelligente</p>
         <h1>Vos stations à portée de main.</h1>
         <p>Trouvez rapidement une station avec du carburant et consultez son niveau d'affluence en temps réel.</p>
         <ul class="ss-auth-features">
           <li><i class="bi bi-geo-alt-fill"></i> Localiser les stations-service</li>
-          <li><i class="bi bi-bar-chart-fill"></i> Voir le niveau d'affluence en temps réel</li>
-          <li><i class="bi bi-fuel-pump-fill"></i> Vérifier la disponibilité du carburant</li>
-          <li><i class="bi bi-clock-fill"></i> Gagner du temps</li>
+          <li><i class="bi bi-bar-chart-fill"></i> Affluence en temps réel</li>
+          <li><i class="bi bi-fuel-pump-fill"></i> Carburant disponible</li>
         </ul>
       </aside>
-
       <main class="ss-auth-form-side">
         <div class="ss-auth-card">
-          <h2>Administration</h2>
-          <p class="subtitle">Connexion réservée aux administrateurs.</p>
+          <h2>Connexion</h2>
+          <p class="subtitle">Connectez-vous à votre compte SmartStation.</p>
 
           {% if messages %}
             {% for message in messages %}
@@ -43,30 +40,27 @@
           <form method="post">
             {% csrf_token %}
             {% if form.non_field_errors %}
-              {% for error in form.non_field_errors %}
-                <div class="alert alert-danger">{{ error }}</div>
+              {% for e in form.non_field_errors %}
+                <div class="alert alert-danger">{{ e }}</div>
               {% endfor %}
             {% endif %}
-
             <div class="ss-input-group">
               <label for="id_username">Nom d'utilisateur</label>
               <i class="bi bi-person field-icon"></i>
               <input type="text" name="username" id="id_username" class="ss-input" placeholder="Entrez votre nom d'utilisateur" required autofocus />
             </div>
-
             <div class="ss-input-group">
               <label for="id_password">Mot de passe</label>
               <i class="bi bi-lock field-icon"></i>
               <input type="password" name="password" id="id_password" class="ss-input" placeholder="Entrez votre mot de passe" required />
             </div>
-
-            <button type="submit" class="ss-btn ss-btn--primary ss-btn--block ss-btn--lg mt-2">
+            <button type="submit" class="ss-btn ss-btn--primary ss-btn--block ss-btn--lg">
               Se connecter <i class="bi bi-arrow-right"></i>
             </button>
           </form>
-
-          <p class="text-center text-muted small mt-4 mb-0">
-            <a href="{% url 'login' %}" class="text-warning fw-semibold">← Retour à la connexion</a>
+          <p class="text-center mt-3 mb-0 small">
+            Pas de compte ? <a href="{% url 'register' %}" class="text-warning fw-semibold">S'inscrire</a><br>
+            <a href="{% url 'admin-login' %}" class="text-muted">Espace administrateur →</a>
           </p>
         </div>
       </main>

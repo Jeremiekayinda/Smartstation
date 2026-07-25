@@ -1,0 +1,57 @@
+{% load static %}
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{% block title %}Carte{% endblock %} — SmartStation</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" />
+    <link rel="stylesheet" href="{% static 'stations/css/smartstation.css' %}" />
+    <link rel="icon" type="image/png" href="{% static 'stations/img/Smartstationlogo.png' %}" />
+  </head>
+  <body class="ss-map-page">
+  {% include "stations/partials/navbar.html" %}
+
+  <div class="ss-map-toolbar">
+    <div class="ss-search-wrap">
+      <i class="bi bi-search" aria-hidden="true"></i>
+      <input
+        type="search"
+        id="search-stations"
+        class="ss-search"
+        placeholder="Rechercher par station, commune ou adresse…"
+        autocomplete="off"
+        role="combobox"
+        aria-expanded="false"
+        aria-controls="search-suggestions"
+        aria-autocomplete="list"
+      />
+      <div id="search-suggestions" class="ss-search-suggestions" hidden role="listbox" aria-label="Suggestions de stations"></div>
+    </div>
+    <div class="ss-filters" id="filter-affluence-group">
+      <button type="button" class="ss-filter-pill active" data-niveau="">Tous</button>
+      <button type="button" class="ss-filter-pill" data-niveau="faible">Faible</button>
+      <button type="button" class="ss-filter-pill" data-niveau="moyenne">Moyenne</button>
+      <button type="button" class="ss-filter-pill" data-niveau="forte">Forte</button>
+    </div>
+    <button type="button" id="btn-locate" class="ss-btn ss-btn--primary">
+      <i class="bi bi-crosshair"></i> <span class="ss-btn-locate-label">Me localiser</span>
+    </button>
+  </div>
+
+  <div class="ss-map-container">
+    <div id="map" class="ss-map-canvas"></div>
+    <div id="geo-toast" class="ss-geo-toast" hidden role="alert" aria-live="polite"></div>
+    <aside id="station-panel" class="ss-side-panel" aria-hidden="true">
+      <button type="button" class="ss-side-panel__close" id="panel-close" aria-label="Fermer">&times;</button>
+      <p class="ss-side-panel__label">Stations à proximité</p>
+      <div id="panel-content"></div>
+    </aside>
+  </div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+  <script src="{% static 'stations/js/main.js' %}?v=8"></script>
+  </body>
+</html>

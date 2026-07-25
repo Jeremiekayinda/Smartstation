@@ -1,0 +1,15 @@
+{% load static %}
+<nav class="ss-navbar">
+  <a href="{% url 'home' %}" class="ss-logo">
+    <span class="ss-logo__smart">Smart</span><span class="ss-logo__station">Station</span>
+  </a>
+  <div class="ss-navbar__actions">
+    <a href="{% url 'home' %}" class="ss-navbar__link"><i class="bi bi-house"></i> Accueil</a>
+    <a href="{% url 'map' %}" class="ss-navbar__link"><i class="bi bi-map"></i> Carte</a>
+    <a href="{% url 'stations-list' %}" class="ss-navbar__link"><i class="bi bi-list-ul"></i> Stations</a>
+    <a href="{% url 'profile' %}" class="ss-navbar__link"><i class="bi bi-person-circle"></i> Profil</a>
+    {% if user.is_staff or user.is_superuser %}
+      <a href="{% url 'admin-dashboard' %}" class="ss-navbar__link"><i class="bi bi-shield-lock"></i> Admin</a>
+    {% endif %}
+  </div>
+</nav>

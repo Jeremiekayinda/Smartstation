@@ -1,0 +1,31 @@
+{% extends "stations/base_admin.html" %}
+
+{% block title %}Capteurs{% endblock %}
+
+{% block content %}
+<header class="ss-admin-hero">
+  <h1>Gestion des capteurs</h1>
+  <p class="text-secondary mb-0">Historique des données IoT reçues par l'API.</p>
+</header>
+<div class="p-3">
+  <div class="ss-card ss-table-wrap">
+    <table class="ss-table">
+      <thead>
+        <tr><th>Station</th><th>Véhicules détectés</th><th>Horodatage</th></tr>
+      </thead>
+      <tbody>
+        {% for h in historiques %}
+          <tr>
+            <td>{{ h.station.nom }}</td>
+            <td>{{ h.nombre_vehicules }}</td>
+            <td>{{ h.timestamp|date:"d/m/Y H:i:s" }}</td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="3" class="text-muted">Aucune lecture capteur.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <p class="text-muted small mt-3">Endpoint API : <code>POST /api/capteurs/</code></p>
+</div>
+{% endblock %}

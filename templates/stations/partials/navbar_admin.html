@@ -1,0 +1,16 @@
+{% load static %}
+<nav class="ss-navbar ss-navbar--admin" aria-label="Navigation principale">
+  <a href="{% url 'home' %}" class="ss-logo">
+    <span class="ss-logo__smart">Smart</span><span class="ss-logo__station">Station</span>
+  </a>
+  <div class="ss-navbar__actions">
+    <a href="{% url 'home' %}" class="ss-navbar__link"><i class="bi bi-house"></i> Accueil</a>
+    <a href="{% url 'map' %}" class="ss-navbar__link"><i class="bi bi-map"></i> Carte</a>
+    <a href="{% url 'stations-list' %}" class="ss-navbar__link"><i class="bi bi-list-ul"></i> Stations</a>
+    <a href="{% url 'profile' %}" class="ss-navbar__link"><i class="bi bi-person-circle"></i> Profil</a>
+    <span class="ss-admin-mode-badge" title="Espace administration SmartStation">
+      <i class="fa-solid fa-user-shield" aria-hidden="true"></i>
+      <span class="ss-admin-mode-badge__label">Mode Administrateur</span>
+    </span>
+  </div>
+</nav>
